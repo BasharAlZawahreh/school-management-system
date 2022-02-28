@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +13,30 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
+Route::group(
+    [
+        'prefix' => LaravelLocalization::setLocale(),
+        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
+    ],
+    function () { 
+        Route::get('/', function () {
+            return view('dashboard');
+        });
+    }
+);
+
+
+Route::group(['prefix' => LaravelLocalization::setLocale()], function () {
+    /** ADD ALL LOCALIZED ROUTES INSIDE THIS GROUP **/
+
+    Route::get('test', function () {
+        return view('test');
+    });
+});
+
+
 
 Route::get('/', function () {
     return view('dashboard');
