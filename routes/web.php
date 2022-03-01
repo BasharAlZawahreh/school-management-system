@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GradeController;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
@@ -15,15 +16,29 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 */
 
 
+Route::middleware('guest')->group(function(){
+    Route::get('/', function () {
+        return view('auth.login');
+    });
+
+});
+
+
+
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
         'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
     ],
-    function () { 
+    function () {
         Route::get('/', function () {
             return view('dashboard');
         });
+
+            Route::get('/grades', [GradeController::class,'index'])->name('grades.index');
+            Route::post('/grades', [GradeController::class,'store'])->name('grades.store');
+            Route::put('/grades/{grade}', [GradeController::class,'update'])->name('grades.update');
+            Route::delete('/grades/{grade}', [GradeController::class,'destroy'])->name('grades.delete');
     }
 );
 
@@ -38,6 +53,5 @@ Route::group(['prefix' => LaravelLocalization::setLocale()], function () {
 
 
 
-Route::get('/', function () {
-    return view('dashboard');
-});
+
+require __DIR__ . '/auth.php';
