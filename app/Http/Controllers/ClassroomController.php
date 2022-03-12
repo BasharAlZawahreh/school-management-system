@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateClassroomRequest;
 use App\Models\Classroom;
 use App\Models\Grade;
 use Exception;
+use Illuminate\Http\Request;
 
 class ClassroomController extends Controller
 {
@@ -18,9 +19,10 @@ class ClassroomController extends Controller
     public function index()
     {
         $grades = Grade::with('classrooms')->get();
+        $classes = Classroom::with('grade')->get();
 
         return view('classes.classes', [
-            'My_Classes' => Classroom::all(),
+            'classes' => $classes,
             'grades' => $grades
         ]);
     }
@@ -89,7 +91,20 @@ class ClassroomController extends Controller
      */
     public function update(UpdateClassroomRequest $request, Classroom $classroom)
     {
-        //
+        try {
+            $classroom->update([
+                'name' => ['ar' => $request->Name, 'en' => $request->Name_en],
+                'grade_id' => $request['Grade_id']
+            ]);
+
+
+            toastr()->success(trans('messages.Update'));
+            return redirect()->route('classrooms.index');
+        } catch (Exception $e) {
+            toastr()->success(trans($e->getMessage()));
+
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -98,8 +113,42 @@ class ClassroomController extends Controller
      * @param  \App\Models\Classroom  $classroom
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Classroom $classroom)
+    public function destroy($classroomId)
     {
-        //
+        try {
+            Classroom::destroy($classroomId);
+            toastr()->success(trans('messages.Delete'));
+            return redirect()->back();
+        } catch (Exception $e) {
+            toastr()->error('Something went wrong!!');
+        }
+    }
+
+    public function destroyAll(Request $request)
+    {
+        try {
+            $selected = explode(',',$request['delete_all_id']);
+            Classroom::destroy($selected);
+
+            toastr()->success(trans('messages.Delete'));
+            return redirect()->back();
+        } catch (Exception $e) {
+            toastr()->error('Something went wrong!!');
+        }
+    }
+
+    public function filter(Request $request)
+    {
+        $grades = Grade::all();
+        $search = Classroom::where('grade_id',$request->grade_id)->get();
+
+        return view('classes.classes',[
+                        'grades' => $grades
+                 ])->withDetails($search);
+    }
+
+    public function getGradeClassrooms(Grade $grade)
+    {
+       return Classroom::where('grade_id',$grade->id)->pluck('name','id');
     }
 }

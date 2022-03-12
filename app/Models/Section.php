@@ -6,20 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
-class Classroom extends Model
+class Section extends Model
 {
+    use HasFactory;
     use HasFactory,HasTranslations;
+    protected $guarded = [];
 
     public $translatable = ['name'];
-    protected $guarded = [];
 
     public function grade()
     {
         return $this->belongsTo(Grade::class);
     }
 
-    public function sections()
+    public function class()
     {
-        return $this->hasMany(Section::class);
+        return $this->belongsTo(Classroom::class);
     }
+
 }

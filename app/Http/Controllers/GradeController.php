@@ -93,10 +93,11 @@ class GradeController extends Controller
                 'notes' => $request->Notes
             ]);
 
+            $grade->save();
+
             toastr()->success(trans('messages.Update'));
 
             return redirect()->back();
-
         } catch (Exception $e) {
             toastr()->error('Error');
 
@@ -113,15 +114,20 @@ class GradeController extends Controller
     public function destroy(Grade $grade)
     {
         try {
+            if ($grade->classrooms->count() > 0) {
+
+                toastr()->error('you cant delete this before delete related classes!');
+                return redirect()->back();
+            }
+
             $grade->delete();
 
             toastr()->success(trans('messages.Delete'));
-
             return redirect()->back();
 
         } catch (Exception $e) {
-            toastr()->error('Error');
 
+            toastr()->error('Error');
             return redirect()->back();
         }
     }
